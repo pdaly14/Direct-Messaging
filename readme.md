@@ -5,10 +5,17 @@ This is not secure whatsoever, and is also the first project I have ever made. I
 
 
 
-Feature cheklist:
+Feature checklist:
+
 Host to a domain [ ]
+
 Secure [ ]
+
 Add an authentication system [ ]
+
 Add a chats lists [ ]
+
 Add file support [ ]
+
 First Github commit [X]
+
