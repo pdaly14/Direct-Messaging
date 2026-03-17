@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<h1>Login</h1>
+
+<form method="POST" action="/login">
+    <label for="username">Username:</label>
+    <input type="text" name="username" id="username" placeholder="Enter 'You' or 'Alex'" required>
+    <button type="submit">Login</button>
+</form>
+
+</body>
+
