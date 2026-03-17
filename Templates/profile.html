@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1> Welcome, {{ username }}!</h1>
+  
+</body> 
+
+<nav>
+  <form method="GET" action="/">
+    <button type="submit">Back to Chat</button>
+    </form>
+  
+
+   <form method="POST" action="/logout">
+    <button type="submit">Logout</button>
+    </form>
+</nav>

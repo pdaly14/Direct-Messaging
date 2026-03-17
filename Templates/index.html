@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<link rel="icon" href="/static/favicon.ico">
+<head>
+    <title>Messaging App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <p>Logged in as: {{ username }}</p>
+
+    <form method="POST" action="/profile">
+        <button type="submit">View Profile</button>
+    </form>
+
+    <h1>Messaging App</h1>
+
+    <div id="chat-box">
+        {% for msg in messages %}
+            <p>
+              <strong>{{ msg.user }}:</strong>
+              {{ msg.text }}
+              <em>({{ msg.time }})</em>
+            </p>
+        {% endfor %}
+    </div>
+
+    <!-- Flask message sending (reload-based) -->
+    <form method="POST" action="/send">
+        <input type="text" name="message" placeholder="Type a message..." required>
+        <button type="submit">Send</button>
+    </form>
+
+    <form method="POST" action="/logout">
+        <button type="submit">Logout</button>
+    </form>
+
+    <!-- JS test area -->
+    <hr>
+    <button onclick="sayHi()">JS Test Button</button>
+    <p id="output"></p>
+
+    <script>
+        const username = "{{ username }}";
+    </script>
+    <!-- JS MUST be last -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+</body>
+</html>

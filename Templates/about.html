@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<link rel="icon" href="/static/favicon.ico">
+<head>
+    <title>Messaging App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <p> this was made by paterson </p>
+    <button onclick="secretFunction()">Secret Button</button>
+    <p id="67"></p>
+
+     <!-- JS MUST be last -->
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
