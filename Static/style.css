@@ -17,9 +17,7 @@ body {
     margin-bottom: 10px;
 }
 
-form {
-    display: flex;
-}
+
 
 input {
     flex: 1;
