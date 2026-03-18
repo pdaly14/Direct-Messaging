@@ -11,7 +11,7 @@ Host to a domain [ ]
 
 Secure [ ]
 
-Add an authentication system [ ]
+Add an authentication system [X]
 
 Add a chats lists [ ]
 
