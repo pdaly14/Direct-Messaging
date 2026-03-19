@@ -1,8 +1,21 @@
+This is the latest untested version. To find specific versions, search for a branch with the version name. For details about the project plans, and side projects refer to the main branch.
+
 WARNING
 
-This is not secure whatsoever, and is also the first project I have ever made. I would not even recommend reading these files, let alone using them. 
+This is not secure whatsoever, and is also the first project I have ever made. I would not even recommend reading these files, let alone using them. If you are looking for the very latest version, refer to the master branch.
 
+Feature checklist:
 
-How I work on this project
+Host to a domain [ ]
 
-I write all my code in vs code, and right now I am trying to commit from the terminal in vs code, lets see if it works!
+Secure [ ]
+
+Add an authentication system [X]
+
+Add a chats lists [ ]
+
+Add file support [ ]
+
+First Github commit [X]
+
+Add admin control system [X]
