@@ -1,0 +1,40 @@
+<html>
+<head>
+    <title>Admin Panel</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>  
+    <h1>Admin Panel</h1>
+    <h2>Users</h2>
+    
+    {% for user in users %}
+        <li>
+        <strong>User:</strong> {{ user['username'] }} | 
+        <strong>Hash:</strong> <small>{{ user['password'][:15] }}...</small>
+        
+        <form action="{{ url_for('delete_user', username=user['username']) }}" method="POST" style="display:inline;">
+            <button type="submit">Delete</button>
+        </form>
+    </li>
+    {% endfor %}
+    </ul>
+    </ul>
+    <h2>Messages</h2>
+    <ul>
+    {% for message in messages %}
+        <li>
+            <strong>{{ message['user'] }}:</strong> {{ message['text'] }}
+            <small>({{ message['time'] }})</small>
+            <form action="{{ url_for('delete_message', msg_index=loop.index0) }}" method="POST" style="display:inline;">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+    {% endfor %}
+    </ul>
+    <form action="{{ url_for('clear_all_messages') }}" method="POST" style="display:inline;">
+        <button type="submit" style="color: red; cursor: pointer;">Clear All Messages</button>
+    </form>
+    <a href="{{ url_for('logout') }}">Logout</a>
+    <a href="{{ url_for('home') }}">Back to Chat</a>
+</body>
+</html>
