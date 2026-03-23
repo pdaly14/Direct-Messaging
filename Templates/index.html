@@ -10,16 +10,16 @@
 
     <p>Logged in as: {{ username }}</p>
 
-    <form method="POST" action="/profile">
-        <button type="submit">View Profile</button>
-    </form>
+    <a href="{{ url_for('profile', user=username) }}">
+        <button type="button">View Profile</button>
+    </a>
 
     <h1>Messaging App</h1>
 
     <div id="chat-box">
         {% for msg in messages %}
             <p>
-              <strong>{{ msg.user }}:</strong>
+              <strong><a href="{{ url_for('profile', user=msg.user) }}">{{ msg.user }}</a>:</strong> 
               {{ msg.text }}
               <em>({{ msg.time }})</em>
             </p>
@@ -28,7 +28,7 @@
 
     <!-- Flask message sending (reload-based) -->
     <form method="POST" action="/send">
-        <input type="text" name="message" placeholder="Type a message..." required>
+        <input type="text" name="message" placeholder="Type a message..." required autofocus>
         <button type="submit">Send</button>
     </form>
 

@@ -3,24 +3,32 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 app = Flask(__name__)
 app.secret_key = "supersecretkey"  # needed for sessions
-
+key = "Nantucket"
 
 messages = [
-        {"user": "Alex", "text": "Hello!", "time": "09:30"},
-        {"user": "You", "text": "Hi!", "time": "10:00"},
+        {"user": "Jonathan", "text": "Hello!", "time": "09:30"},
+        {"user": "admin", "text": "Hi!", "time": "10:00"},
     ]
 
 users = [
     {
-        "username": "You",
-        "password": generate_password_hash("password123")
+        "username": "Jonathan",
+        "password" : generate_password_hash("password123"),
+        "description": "I am gay with Budvin"
     },
     {
-        "username": "Alex",
-        "password": generate_password_hash("password123")
+        "username": "Nadula",
+        "password": generate_password_hash("password123"),
+        "description": "I am a student"
     },
     {   "username": "admin", 
-     "password": generate_password_hash("admin123") }
+     "password": generate_password_hash("admin123"),
+     "description": "I am the admin I can cook all of u and eat u all up"
+    },
+    {   "username": "Budvin",
+      "password": generate_password_hash("Budvin"),
+      "description": "I am Budvin, gay with Jonathan we have sex all day and night"}   
+
 ]
   
 
@@ -29,33 +37,37 @@ users = [
 def complete_signup():
     username = request.form.get("username")
     password = request.form.get("password")
+    code = request.form.get("accesskey")
 
-    if username and password:
+    if code == key:
+        if username and password and code:
         # Check if user already exists
-        if not any(user["username"] == username for user in users):
+            if not any(user["username"] == username for user in users):
             # Create new user
-            users.append({
-                "username": username,
-                "password": generate_password_hash(password)
-            })
-            session["username"] = username
-            return redirect(url_for("home"))
+                users.append({
+                    "username": username,
+                    "password": generate_password_hash(password),
+                    "description": "No description yet."
+                })
+                session["username"] = username
+                return redirect(url_for("home"))
+            else:
+                return "Username already exists!"
         else:
-            return "Username already exists!"
+            return "Please fill in all fields!"
     else:
-        return "Please fill in all fields!"
-
+        return "Incorrect secret code"
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if "username" in session:
         return redirect(url_for("home"))  # already logged in
-    return render_template("signup.html")
+    return render_template("signup.html", code=key)
 @app.route("/")
 def home():
     if "username" not in session:
         return redirect(url_for("login"))  # force login first
 
-    return render_template("index.html", messages=messages, username=session["username"])
+    return render_template("index.html", messages=messages, username=session["username"], )
 
 
 @app.route("/send", methods=["POST"])
@@ -91,16 +103,34 @@ def login():
             return "Invalid username or password!'"
     return render_template("login.html")
 
+@app.route("/update_description", methods=["POST"])
+def update_description():
+    if "username" not in session:
+        return redirect(url_for("login"))
+    
+    new_bio = request.form.get("new_bio")
+    current_user = session["username"]
+    
+    # Update the description for the current user
+    for user in users:
+        if user["username"] == current_user:
+            user["description"] = new_bio
+            break
+    
+    return redirect(url_for("profile", user=current_user))
+
 @app.route("/logout", methods=["POST", "GET"])
 def logout():
     session.pop("username", None)  # remove user from session
     return redirect(url_for("login"))
 
-@app.route("/profile", methods=["POST", "GET"])
-def profile():
+@app.route("/profile/<user>", methods=["POST", "GET"])
+def profile(user):
     if "username" not in session:
         return redirect(url_for("login"))
-    return render_template("profile.html", username=session["username"])
+    description = next((u["description"] for u in users if u["username"] == user), "No description available.")
+    return render_template("profile.html", profile_name=user, profile_desc=description, current_user=session["username"]   )
+
 @app.route("/messages")
 def get_messages():
     return messages
@@ -111,7 +141,7 @@ def secret():
 def admin():
     if "username" not in session or session["username"] != "admin":
         return redirect(url_for("login"))
-    return render_template("admin.html", users=users, messages=messages)
+    return render_template("admin.html", users=users, messages=messages, code=key)
 
 @app.route("/delete_message/<int:msg_index>", methods=["POST"])
 def delete_message(msg_index):
@@ -149,8 +179,15 @@ def delete_user(username):
     users = [u for u in users if u["username"] != username]
     return redirect(url_for("admin"))
 
-
+@app.route("/changecode/", methods=["POST"])
+def change_code():
+    if "username" not in session or session["username"] != "admin":
+        return redirect(url_for("login"))
+    
+    global key
+    key = request.form.get("code")
+    return redirect(url_for("admin"))
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+      app.run(host="127.0.0.1", port=5000, debug=True)
 

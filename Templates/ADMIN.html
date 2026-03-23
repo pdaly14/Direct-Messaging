@@ -10,7 +10,7 @@
     {% for user in users %}
         <li>
         <strong>User:</strong> {{ user['username'] }} | 
-        <strong>Hash:</strong> <small>{{ user['password'][:15] }}...</small>
+        <strong>Hash:</strong> <small>{{ user['password'] }}</small>
         
         <form action="{{ url_for('delete_user', username=user['username']) }}" method="POST" style="display:inline;">
             <button type="submit">Delete</button>
@@ -33,6 +33,11 @@
     </ul>
     <form action="{{ url_for('clear_all_messages') }}" method="POST" style="display:inline;">
         <button type="submit" style="color: red; cursor: pointer;">Clear All Messages</button>
+    </form>
+    <p> Secret key is {{ code }}</p>
+    <form method="POST" action="{{ url_for('change_code') }}">
+        <input type="text" name="code" id="code" placeholder="Change the code">
+        <button type="submit">Change</button>
     </form>
     <a href="{{ url_for('logout') }}">Logout</a>
     <a href="{{ url_for('home') }}">Back to Chat</a>

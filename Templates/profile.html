@@ -5,8 +5,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1> Welcome, {{ username }}!</h1>
-  
+    <h1> Welcome, {{ profile_name }}!</h1>
+    <p>{{ profile_desc }}</p>
+    {% if profile_name == current_user %}
+        <hr>
+        <h3>Edit your description:</h3>
+        <form action="/update_description" method="POST">
+            <textarea name="new_bio">{{ profile_desc }}</textarea><br>
+            <button type="submit">Save Changes</button>
+        </form>
+    {% endif %}
 </body> 
 
 <nav>

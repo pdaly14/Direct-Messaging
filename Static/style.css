@@ -9,13 +9,16 @@ body {
 }
 
 #chat-box {
+       /* Forces items to stack tightly at the "start" (which is the bottom) */
     background: white;
     padding: 10px;
     height: 300px;
     overflow-y: auto;
     border-radius: 5px;
     margin-bottom: 10px;
+    overflow-y: auto;
 }
+
 
 
 
@@ -52,4 +55,24 @@ button:hover {
 /* apply it to an element */
 li {
     animation: fadeIn 0.3s ease;
+}
+
+
+textarea {
+    width: 90%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    resize: vertical;
+}
+
+a {
+  font-weight: bold;       /* Make the text bold */
+  text-decoration: none;   /* Remove underline */
+  color: inherit;          /* Use color of surrounding text */
+}
+
+/* Optional: Add underline back on hover for usability */
+a:hover {
+  text-decoration: underline;
 }
