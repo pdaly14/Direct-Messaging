@@ -1,9 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+
 app = Flask(__name__)
 app.secret_key = "supersecretkey"  # needed for sessions
 key = "Nantucket"
+
+
+
+
 
 messages = [
         {"user": "Jonathan", "text": "Hello!", "time": "09:30"},
@@ -31,6 +36,15 @@ users = [
 
 ]
   
+@app.before_request
+def check_if_user_still_exists():
+    if "username" in session:
+        # Check if the person in the session is actually in your 'users' list
+        exists = any(u["username"] == session["username"] for u in users)
+        
+        if not exists:
+            session.clear()  # Kick them out!
+            return redirect(url_for("login"))
 
 
 @app.route("/completesignup", methods=["POST"])
@@ -189,5 +203,5 @@ def change_code():
     return redirect(url_for("admin"))
 
 if __name__ == '__main__':
-      app.run(host="127.0.0.1", port=5000, debug=True)
+      app.run(host="0.0.0.0", port=5000, debug=True)
 

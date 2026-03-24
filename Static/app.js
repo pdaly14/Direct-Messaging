@@ -24,7 +24,10 @@ function fetchMessages() {
         p.innerHTML = `<strong><a href="/profile/${msg.user}">${msg.user}</a>:</strong> ${msg.text} <em>(${msg.time})</em>`;
 
         chatBox.appendChild(p);
+        
+        
       });
+  
     });
 }
 

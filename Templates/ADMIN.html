@@ -23,7 +23,7 @@
     <ul>
     {% for message in messages %}
         <li>
-            <strong>{{ message['user'] }}:</strong> {{ message['text'] }}
+            <strong><a href="{{ url_for('profile', user=message['user']) }}">{{ message['user'] }}:</a></strong> {{ message['text'] }}
             <small>({{ message['time'] }})</small>
             <form action="{{ url_for('delete_message', msg_index=loop.index0) }}" method="POST" style="display:inline;">
                 <button type="submit">Delete</button>
