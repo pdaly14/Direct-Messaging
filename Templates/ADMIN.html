@@ -9,10 +9,10 @@
     
     {% for user in users %}
         <li>
-        <strong>User:</strong> {{ user['username'] }} | 
-        <strong>Hash:</strong> <small>{{ user['password'] }}</small>
+        <strong>User:</strong> {{ user.username }} | 
+        <strong>Hash:</strong> <small>{{ user.password }}</small>
         
-        <form action="{{ url_for('delete_user', username=user['username']) }}" method="POST" style="display:inline;">
+        <form action="{{ url_for('delete_user', username=user.username) }}" method="POST" style="display:inline;">
             <button type="submit">Delete</button>
         </form>
     </li>

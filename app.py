@@ -1,7 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from typing import List
+from unittest.mock import Base
+
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session
+from sqlalchemy import create_engine, Column, Integer, String, text
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-
+from sqlalchemy.orm import declarative_base, sessionmaker
+Base = declarative_base()
 app = Flask(__name__)
 app.secret_key = "supersecretkey"  # needed for sessions
 key = "Nantucket"
@@ -9,6 +14,28 @@ key = "Nantucket"
 
 
 
+
+engine = create_engine('sqlite:///example.db')
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    username = Column(String(20), unique=True)
+    password = Column(String(20)) 
+    description = Column(String(200)) 
+    pfp =  Column(String(200))
+
+
+
+class Message(Base):
+    __tablename__ = 'messages'
+    id = Column(Integer, primary_key=True)
+    user = Column(String(20))
+    text = Column(String(200))
+    time = Column(String(10))
+
+Base.metadata.create_all(engine)
+Session = sessionmaker(engine)
+db_session = Session()
 
 messages = [
         {"user": "Jonathan", "text": "Hello!", "time": "09:30"},
@@ -19,28 +46,52 @@ users = [
     {
         "username": "Jonathan",
         "password" : generate_password_hash("password123"),
-        "description": "I am gay with Budvin"
+        "description": "I am gay with Budvin",
+        "pfp": ""
     },
     {
         "username": "Nadula",
         "password": generate_password_hash("password123"),
-        "description": "I am a student"
+        "description": "I am a student",
+        "pfp": ""
     },
     {   "username": "admin", 
      "password": generate_password_hash("admin123"),
-     "description": "I am the admin I can cook all of u and eat u all up"
+     "description": "I am the admin I can cook all of u and eat u all up",
+     "pfp": ""
     },
     {   "username": "Budvin",
       "password": generate_password_hash("Budvin"),
-      "description": "I am Budvin, gay with Jonathan we have sex all day and night"}   
-
+      "description": "I am Budvin, gay with Jonathan we have sex all day and night",
+      "pfp": ""
+    }
+    
 ]
-  
+
+
+def seed_users():
+    for user in users:
+        existing_user = db_session.query(User).filter_by(username=user["username"]).first()
+        if not existing_user:
+            new_user = User(username=user["username"], password=user["password"], description=user["description"], pfp=user["pfp"])
+            db_session.add(new_user)
+
+def seed_messages():
+    for msg in messages:
+        existing_msg = db_session.query(Message).filter_by(user=msg["user"], text=msg["text"], time=msg["time"]).first()
+        if not existing_msg:
+            new_msg = Message(user=msg["user"], text=msg["text"], time=msg["time"])
+            db_session.add(new_msg)
+
+seed_users()
+seed_messages()
+db_session.commit()
+
 @app.before_request
 def check_if_user_still_exists():
     if "username" in session:
         # Check if the person in the session is actually in your 'users' list
-        exists = any(u["username"] == session["username"] for u in users)
+        exists = db_session.query(User).filter_by(username=session["username"]).first() is not None
         
         if not exists:
             session.clear()  # Kick them out!
@@ -56,14 +107,25 @@ def complete_signup():
     if code == key:
         if username and password and code:
         # Check if user already exists
-            if not any(user["username"] == username for user in users):
+            if not db_session.query(User).filter_by(username=username).first():
+
             # Create new user
                 users.append({
                     "username": username,
                     "password": generate_password_hash(password),
                     "description": "No description yet."
                 })
-                session["username"] = username
+                new_user = User(
+                    username=username,
+                    password=generate_password_hash(password),
+                    description="No description yet."
+                )
+                try:
+                    db_session.add(new_user)
+                    db_session.commit()
+                except:
+                    db_session.rollback()
+                    return "Username already exists!"
                 return redirect(url_for("home"))
             else:
                 return "Username already exists!"
@@ -80,7 +142,7 @@ def signup():
 def home():
     if "username" not in session:
         return redirect(url_for("login"))  # force login first
-
+    messages = db_session.query(Message).all()
     return render_template("index.html", messages=messages, username=session["username"], )
 
 
@@ -93,11 +155,13 @@ def send_message():
 
     if msg_text:
         timestamp = datetime.now().strftime("%H:%M")
-        messages.append({
-            "user": session["username"],
-            "text": msg_text,
-            "time": timestamp
-        })
+        new_message = Message(
+            user=session["username"],
+            text=msg_text,
+            time=timestamp
+        )
+        db_session.add(new_message)
+        db_session.commit()
 
     return redirect(url_for("home"))
 
@@ -109,12 +173,12 @@ def login():
         password = request.form.get("password")
 
         # Check if user exists and password is correct
-        user = next((u for u in users if u["username"] == username), None)
-        if user and check_password_hash(user["password"], password):
+        user = db_session.query(User).filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
             session["username"] = username  # save user in session
             return redirect(url_for("home"))
         else:
-            return "Invalid username or password!'"
+            return "Invalid username or password!"
     return render_template("login.html")
 
 @app.route("/update_description", methods=["POST"])
@@ -126,10 +190,10 @@ def update_description():
     current_user = session["username"]
     
     # Update the description for the current user
-    for user in users:
-        if user["username"] == current_user:
-            user["description"] = new_bio
-            break
+    user = db_session.query(User).filter_by(username=current_user).first()
+    if user:
+        db_session.query(User).filter_by(username=current_user).update({"description": new_bio})
+        db_session.commit()
     
     return redirect(url_for("profile", user=current_user))
 
@@ -142,12 +206,20 @@ def logout():
 def profile(user):
     if "username" not in session:
         return redirect(url_for("login"))
-    description = next((u["description"] for u in users if u["username"] == user), "No description available.")
+    description = db_session.query(User).filter_by(username=user).first().description
     return render_template("profile.html", profile_name=user, profile_desc=description, current_user=session["username"]   )
 
 @app.route("/messages")
 def get_messages():
-    return messages
+    mesagges = []
+    for msg in db_session.query(Message).all():
+        mesagges.append({
+            "user": msg.user,
+            "text": msg.text,
+            "time": msg.time
+        })
+
+    return jsonify(mesagges)
 @app.route("/secret")
 def secret():
    return render_template("about.html")
@@ -155,6 +227,9 @@ def secret():
 def admin():
     if "username" not in session or session["username"] != "admin":
         return redirect(url_for("login"))
+    users = db_session.query(User).all()
+    messages = db_session.query(Message).all()
+   
     return render_template("admin.html", users=users, messages=messages, code=key)
 
 @app.route("/delete_message/<int:msg_index>", methods=["POST"])
@@ -164,8 +239,10 @@ def delete_message(msg_index):
         return redirect(url_for("login"))
     
     # Check if the index exists before trying to pop it
-    if 0 <= msg_index < len(messages):
-        messages.pop(msg_index)
+    if 0 <= msg_index < db_session.query(Message).count():
+        message_to_delete = db_session.query(Message).offset(msg_index).first()
+        db_session.delete(message_to_delete)
+        db_session.commit()
         
     return redirect(url_for("admin"))
 
@@ -177,7 +254,8 @@ def clear_all_messages():
         return redirect(url_for("login"))
     
     # This empties the global 'messages' list
-    messages.clear()
+    db_session.query(Message).delete()
+    db_session.commit()
     
     return redirect(url_for("admin"))
 
@@ -190,7 +268,8 @@ def delete_user(username):
     if username == "admin":
         return "Cannot delete admin user!"
     # Rebuild the list without the deleted user
-    users = [u for u in users if u["username"] != username]
+    db_session.query(User).filter_by(username=username).delete()
+    db_session.commit()
     return redirect(url_for("admin"))
 
 @app.route("/changecode/", methods=["POST"])
@@ -203,5 +282,5 @@ def change_code():
     return redirect(url_for("admin"))
 
 if __name__ == '__main__':
-      app.run(host="0.0.0.0", port=5000, debug=True)
+      app.run(host="127.0.0.1", port=5000, debug=True)
 
