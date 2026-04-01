@@ -2,7 +2,7 @@
 
 Progress has been abandoned on this project for now, it is now part of LootIt. I am aiming to bring some of the chat updates from LootIt to here so that you can create your own messaging app easily. 
 
-**NEWS**
+
 
 This is the latest untested version. To find specific versions, search for a branch with the version name. For details about the project plans, and side projects refer to the main branch.
 
